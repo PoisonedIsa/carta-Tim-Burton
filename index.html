@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Extraño Amor</title>
+    <style>
+        /* Fuentes: Una tipo "título de película de terror infantil" y otra tipo "máquina de escribir" */
+        @import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Courier+Prime&display=swap');
+
+        :root {
+            --tb-black: #111111;
+            --tb-white: #f4f4f4;
+            --tb-gray: #888888;
+            --tb-violet: #764c8f; /* Nuevo tono violeta */
+            --tb-stitch: #333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--tb-black);
+            color: var(--tb-black);
+            font-family: 'Courier Prime', monospace;
+            overflow-x: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* FONDO ESTILO BURTON (Rayas y Espirales) */
+        .burton-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            /* Patrón de rayas verticales */
+            background: repeating-linear-gradient(
+                90deg,
+                #222,
+                #222 20px,
+                #333 20px,
+                #333 40px
+            );
+            overflow: hidden;
+        }
+
+        /* Espirales decorativas en el fondo */
+        .spiral {
+            position: absolute;
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            animation: spin-slow 20s linear infinite;
+            pointer-events: none;
+        }
+
+        /* Más variaciones de espirales con toques violetas */
+        .spiral:nth-child(1) { width: 300px; height: 300px; top: -50px; left: -50px; border-width: 1px; animation-duration: 25s; }
+        .spiral:nth-child(2) { width: 500px; height: 500px; bottom: -100px; right: -100px; border-width: 3px; animation-direction: reverse; animation-duration: 30s; border-color: rgba(118, 76, 143, 0.2); } /* Violeta sutil */
+        .spiral:nth-child(3) { width: 150px; height: 150px; top: 20%; right: 10%; border-width: 2px; animation-duration: 15s; border-style: dotted; border-color: rgba(118, 76, 143, 0.4); } /* Violeta medio */
+        .spiral:nth-child(4) { width: 400px; height: 400px; top: 40%; left: -150px; border-width: 1px; animation-duration: 35s; opacity: 0.1; }
+        .spiral:nth-child(5) { width: 100px; height: 100px; bottom: 10%; left: 20%; border-width: 4px; border-color: rgba(118, 76, 143, 0.3); animation-duration: 10s; }
+
+        /* Araña colgando */
+        .spider-thread {
+            position: absolute;
+            top: -100px;
+            right: 20%;
+            width: 2px;
+            height: 300px;
+            background: rgba(255,255,255,0.3);
+            animation: spider-drop 8s ease-in-out infinite;
+        }
+        
+        .spider-body {
+            position: absolute;
+            bottom: 0;
+            left: -10px;
+            width: 20px;
+            height: 20px;
+            background: black;
+            border-radius: 50%;
+            border: 1px solid #555;
+            box-shadow: 0 0 5px var(--tb-violet); /* Brillo violeta */
+        }
+
+        @keyframes spin-slow { 100% { transform: rotate(360deg); } }
+        
+        @keyframes spider-drop {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(50px); }
+        }
+
+        /* PANTALLA DE CARGA */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--tb-black);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .loader-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid transparent;
+            border-top: 4px solid var(--tb-violet); /* Violeta */
+            border-left: 4px solid var(--tb-white);
+            border-radius: 50%;
+            animation: spin 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite; /* Giro "tétrico" */
+            margin-bottom: 20px;
+        }
+
+        .loader-text {
+            color: var(--tb-white);
+            font-family: 'Amatic SC', cursive;
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+        }
+
+        /* CONTENEDOR */
+        .container {
+            width: 90%;
+            max-width: 380px;
+            height: 85vh;
+            position: relative;
+            opacity: 0; 
+            transition: opacity 0.8s ease-in;
+        }
+
+        .container.loaded { opacity: 1; }
+
+        /* TARJETA */
+        .card {
+            width: 100%;
+            height: 100%;
+            background-color: #e8e8e8; /* Gris muy claro, casi papel viejo */
+            
+            /* Borde con "costuras" */
+            border: 2px dashed var(--tb-black);
+            outline: 4px solid transparent;
+            /* Sombra dura con un toque violeta muy sutil */
+            box-shadow: 10px 10px 0px rgba(0,0,0,0.5), 0 0 15px rgba(118, 76, 143, 0.2);
+            
+            border-radius: 5px; /* Bordes ligeramente redondeados pero imperfectos */
+            padding: 30px 25px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            position: relative;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            scroll-behavior: smooth;
+            
+            /* Animación sutil de respiración */
+            animation: card-breathe 6s ease-in-out infinite;
+        }
+        
+        @keyframes card-breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.01); }
+        }
+
+        .card::-webkit-scrollbar { display: none; }
+
+        /* Textura sucia */
+        .card::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .card > * { z-index: 1; }
+
+        .date-location {
+            text-align: right;
+            font-size: 0.8rem;
+            color: #555;
+            margin-bottom: 30px;
+            letter-spacing: -0.5px;
+            border-bottom: 1px dashed #000;
+        }
+
+        h1 {
+            font-family: 'Amatic SC', cursive;
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: var(--tb-black);
+            margin-bottom: 25px;
+            text-align: left;
+            line-height: 0.9;
+            text-shadow: 2px 2px 0px #ccc;
+        }
+
+        /* Clase para destacar a Samantha */
+        .highlight-name {
+            color: var(--tb-violet);
+            font-size: 1.1em;
+            text-shadow: 1px 1px 0px #000;
+        }
+
+        /* TEXTO DEL POEMA */
+        .letter-body {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            color: #222;
+            text-align: left;
+            margin-bottom: 20px;
+            flex-grow: 1; /* Ocupa el espacio disponible */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Cambio a flex-start para que las imágenes fluyan */
+        }
+
+        .letter-body p {
+            margin-bottom: 5px; /* Reducimos margen porque viene la imagen */
+            padding-left: 15px;
+            border-left: 3px solid var(--tb-black);
+        }
+        
+        .letter-body p:nth-child(even) {
+            border-left: 3px dashed var(--tb-violet); /* Detalle violeta en el borde del párrafo */
+            margin-left: 10px;
+        }
+
+        /* ESTILO PARA IMÁGENES DE VERSOS (PNG sin bordes) */
+        .verse-img {
+            display: block;
+            width: 100%;
+            max-width: 220px; /* Tamaño balanceado para todas */
+            height: auto;
+            margin: 10px auto 30px auto; /* Espacio uniforme arriba y abajo */
+            border: none;
+            box-shadow: none;
+            background: transparent;
+            /* Filtros eliminados para mostrar color original */
+            opacity: 0.95;
+            transition: transform 0.3s ease;
+        }
+        
+        /* Pequeño efecto al pasar el mouse/tocar */
+        .verse-img:hover {
+            transform: scale(1.02) rotate(1deg);
+        }
+
+        /* FIRMA SUTIL */
+        .signature {
+            text-align: right;
+            font-family: 'Amatic SC', cursive;
+            font-size: 1.4rem; /* Más pequeña */
+            color: #444; /* Gris oscuro sutil */
+            margin-top: 25px;
+            margin-right: 15px;
+            transform: rotate(-1deg);
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        /* BOTÓN */
+        .interaction-area {
+            margin-top: auto;
+            text-align: center;
+            padding: 20px 0;
+            border-top: 2px dashed #000;
+        }
+
+        .question {
+            font-family: 'Amatic SC', cursive;
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            color: var(--tb-violet); /* Violeta */
+            text-shadow: 1px 1px 0px #000;
+        }
+
+        .btn-love {
+            background: var(--tb-black);
+            color: var(--tb-white);
+            font-family: 'Amatic SC', cursive;
+            font-size: 1.8rem;
+            padding: 8px 30px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 20px 5px 20px 5px; /* Forma irregular */
+            transition: transform 0.2s;
+            box-shadow: 3px 3px 0px var(--tb-gray);
+            animation: pulse-button 3s infinite;
+        }
+        
+        @keyframes pulse-button {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .btn-love:active {
+            transform: scale(0.95) rotate(1deg);
+            box-shadow: 1px 1px 0px var(--tb-gray);
+        }
+
+        /* POP-UP / MODAL */
+        .modal-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .modal-overlay.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-card {
+            background: #e8e8e8;
+            padding: 25px;
+            width: 85%;
+            max-width: 320px;
+            border: 2px dashed var(--tb-violet); /* Borde violeta en el popup */
+            text-align: center;
+            transform: scale(0.8) rotate(-1deg);
+            transition: transform 0.4s;
+            box-shadow: 0 0 30px rgba(118, 76, 143, 0.2); /* Resplandor violeta */
+            
+            max-height: 90vh;
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        .modal-card::-webkit-scrollbar { display: none; }
+
+        .modal-overlay.visible .modal-card {
+            transform: scale(1) rotate(0deg);
+        }
+
+        .modal-img {
+            width: 100%;
+            height: auto;
+            border: 3px solid var(--tb-black);
+            margin-bottom: 15px;
+            /* Filtros eliminados para mostrar color original */
+            box-shadow: 5px 5px 0px rgba(0,0,0,0.2);
+        }
+
+        .modal-title {
+            font-family: 'Amatic SC', cursive;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--tb-violet); /* Violeta */
+            text-shadow: 1px 1px 0px #000;
+        }
+
+        .modal-text {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .stitch-line {
+            text-align: center;
+            color: var(--tb-violet); /* Violeta */
+            letter-spacing: 5px;
+            margin: 15px 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <!-- Pantalla de Carga -->
+    <div id="loader">
+        <div class="loader-spinner"></div>
+        <div class="loader-text">Cosiendo recuerdos...</div>
+    </div>
+
+    <!-- Fondo de rayas con animaciones -->
+    <div class="burton-background">
+        <div class="spiral"></div>
+        <div class="spiral"></div>
+        <div class="spiral"></div>
+        <div class="spiral"></div>
+        <div class="spiral"></div>
+        <!-- Araña decorativa -->
+        <div class="spider-thread">
+            <div class="spider-body"></div>
+        </div>
+    </div>
+
+    <div class="container" id="mainContainer">
+        <div class="card">
+            
+            <div class="date-location">
+                Desde mi rincón oscuro, 14 Feb
+            </div>
+
+            <h1>Para <span class="highlight-name">Samantha</span>:</h1>
+
+            <div class="letter-body">
+                <!-- VERSO 1 -->
+                <p>
+                    Tengo el alma llena de remiendos,<br>
+                    y pensamientos que son tremendos.<br>
+                    Mis manos son frías como la nieve,<br>
+                    y mi alegría... dura muy breve.
+                </p>
+                <img src="https://github.com/PoisonedIsa/carta-Tim-Burton/blob/main/Imagenes/verso%201.png?raw=true" class="verse-img" alt="Ilustración verso 1">
+
+                <!-- VERSO 2 -->
+                <p>
+                    Pero apareciste tú, <span class="highlight-name">Samantha</span>,<br>
+                    y mi sombra ya no se espanta.<br>
+                    Con tu mirada de luna llena,<br>
+                    borraste de golpe toda mi pena.
+                </p>
+                <img src="https://github.com/PoisonedIsa/carta-Tim-Burton/blob/main/Imagenes/verso%202.png?raw=true" class="verse-img" alt="Ilustración verso 2">
+
+                <!-- VERSO 3 -->
+                <p>
+                    Te regalo una araña y un botón,<br>
+                    que guardaba rotos en mi cajón.<br>
+                    No tengo oro, solo mi espanto,<br>
+                    y este pequeño y triste canto.
+                </p>
+                <img src="https://github.com/PoisonedIsa/carta-Tim-Burton/blob/main/Imagenes/verso%203.png?raw=true" class="verse-img" alt="Ilustración verso 3">
+
+                <!-- VERSO 4 -->
+                <p>
+                    Si aceptas mis sombras y cicatrices,<br>
+                    seremos dos espectros felices.<br>
+                    Bailaremos juntos bajo la tormenta,<br>
+                    sin que el resto del mundo se de cuenta.
+                </p>
+                <img src="https://github.com/PoisonedIsa/carta-Tim-Burton/blob/main/Imagenes/verso%203%20(1).png?raw=true" class="verse-img" alt="Ilustración verso 4">
+
+                <!-- FIRMA SUTIL -->
+                <div class="signature">
+                    I.M.
+                </div>
+            </div>
+
+            <div class="interaction-area">
+                <div class="question">¿Quieres mi corazón?</div>
+                <div class="buttons">
+                    <button class="btn-love" onclick="showPopup()">Me encantaría</button>
+                </div>
+            </div>
+
+            <!-- POP-UP -->
+            <div class="modal-overlay" id="modalOverlay">
+                <div class="modal-card">
+                    <!-- Imagen final (Color Original) -->
+                    <img src="https://github.com/PoisonedIsa/carta-Tim-Burton/blob/main/Imagenes/pop%20up%20(1).png?raw=true" alt="Pop Up Tim Burton" class="modal-img">
+                    
+                    <div class="modal-text" style="font-size: 1.2rem; margin-top: 15px; font-weight: bold;">
+                        <p>"Qué bonito sería encontrar después de la muerte, allí donde todo es perfecto"</p>
+                    </div>
+                    
+                    <p style="font-family: 'Amatic SC', cursive; font-size: 1.5rem; color: var(--tb-violet); margin-top: 10px;">
+                        - Tim Burton
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Lógica de precarga
+        window.addEventListener('load', function() {
+            const loader = document.getElementById('loader');
+            const container = document.getElementById('mainContainer');
+            
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                    container.classList.add('loaded');
+                }, 500);
+            }, 1000);
+        });
+
+        // Mostrar Popup y Bloquear Scroll
+        function showPopup() {
+            const overlay = document.getElementById('modalOverlay');
+            overlay.classList.add('visible');
+            
+            // Subir automáticamente
+            const card = document.querySelector('.card');
+            card.scrollTop = 0;
+
+            // Bloquear scroll
+            card.style.overflow = 'hidden';
+        }
+    </script>
+</body>
+</html>
